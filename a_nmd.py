@@ -1,5 +1,6 @@
 import numpy as np
 import numpy.typing as npt
+from typing import Tuple
 from time import perf_counter
 from utils import compute_abs_error, print_final_msg
 from scipy.sparse.linalg import svds
@@ -17,8 +18,10 @@ def a_nmd(
     tol: float = 1.0e-4,
     tol_over_10iters: float = 1.0e-5,
     verbose: bool = True,
-) -> (npt.NDArray[np.float_], list[float], int, list[float]):
+) -> Tuple[npt.NDArray[np.float_], list[float], int, list[float]]:
     """Aggressive Momentum NMD (A-NMD)
+
+    Direct port of the matlab version: https://gitlab.com/ngillis/ReLU-NMD/
 
     Args:
         X (npt.NDArray[np.float_]): (m, n) sparse non-negative matrix

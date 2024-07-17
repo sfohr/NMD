@@ -1,5 +1,6 @@
 import numpy as np
 import numpy.typing as npt
+from typing import Tuple
 from time import perf_counter
 from utils import compute_abs_error, print_final_msg
 
@@ -9,20 +10,22 @@ def nmd_3b(
     r: int,
     W0: npt.NDArray[np.float_] = None,
     H0: npt.NDArray[np.float_] = None,
-    beta1: float = 0.7,
+    beta: float = 0.7,
     max_iters: int = 1000,
     tol: float = 1e-4,
     tol_over_10iters: float = 1e-5,
     verbose: bool = True,
-) -> (npt.NDArray[np.float_], list[float], int, list[float]):
+) -> Tuple[npt.NDArray[np.float_], list[float], int, list[float]]:
     """NMD using three-block alternating minimization.
+
+    Direct port of the matlab version: https://gitlab.com/ngillis/ReLU-NMD/
 
     Args:
         X (npt.NDArray[np.float_]): (m, n) sparse non-negative matrix
         r (int): approximation rank
         W0 (npt.NDArray[np.float_], optional): initial W. Defaults to np.random.randn(m, r) if none is provided.
         H0 (npt.NDArray[np.float_], optional): initial H. Defaults to np.random.randn(r, n) if none is provided.
-        beta1 (float, optional): momentum parameter. Defaults to 0.7.
+        beta (float, optional): momentum parameter. Defaults to 0.7.
         max_iters (int, optional): maximum number of iterations. Defaults to 1000.
         tol (float, optional):  stopping criterion on the relative error: ||X-max(0,WH)||/||X|| < tol. Defaults to 1e-4.
         tol_over_10iters (float, optional): stopping criterion tolerance on 10 successive errors: abs(errors[i] - errors[i-10]) < tol_err. Defaults to 1e-5.
@@ -66,8 +69,8 @@ def nmd_3b(
 
         Z = np.minimum(0.0, Theta * x_is_zero)
         Z += X * x_is_pos
-        Z *= 1 + beta1
-        Z -= beta1 * Z_old
+        Z *= 1 + beta
+        Z -= beta * Z_old
 
         # rcond to silence future warning
         W = np.linalg.lstsq(H @ H.T, H @ Z.T, rcond=None)[0].T
@@ -90,8 +93,8 @@ def nmd_3b(
             break
 
         if i < max_iters - 1:
-            Theta *= 1.0 + beta1
-            Theta -= beta1 * Theta_old
+            Theta *= 1.0 + beta
+            Theta -= beta * Theta_old
 
         Z_old, Theta_old = Z.copy(), Theta.copy()
 
