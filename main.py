@@ -1,5 +1,7 @@
 from a_nmd import a_nmd
 from nmd_3b import nmd_3b
+from nmd_t import nmd_t
+from nuclear_norm_init import nuclear_norm_init
 import numpy.typing as npt
 import numpy as np
 
@@ -34,8 +36,15 @@ if __name__ == "__main__":
     X = generate_sparse_matrix(m, n, r, c)
     print(f"Sparsity: {np.sum(X == 0) / X.size}")
 
+    # initialization
+    W0, H0 = nuclear_norm_init(X, m, n, r=r)
+    Theta0 = W0 @ H0
+
     # Aggressive momentum NMD
-    theta_a, loss_a, i_a, times_a = a_nmd(X, r=r)
+    theta_a, loss_a, i_a, times_a = a_nmd(X, r=r, Theta0=Theta0)
 
     # 3-block NMD
-    theta_3b, loss_3b, i_3b, times_3b = nmd_3b(X, r=r)
+    theta_3b, loss_3b, i_3b, times_3b = nmd_3b(X, r=r, W0=W0, H0=H0)
+
+    # NMD-T
+    theta_t, W_t, H_t, loss_t, i_t, times_t = nmd_t(X, r=r, W0=W0, H0=H0)
